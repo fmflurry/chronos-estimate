@@ -241,3 +241,22 @@ GPLv3
 ## Contributing
 
 Contributions are welcome! Feel free to submit issues or pull requests.
+
+---
+
+## Google OAuth Setup (Local)
+
+1) Create OAuth client (Web) in Google Cloud:
+- Authorized redirect URI: `http://localhost:3333/auth/google/callback`
+- Authorized JavaScript origin: `http://localhost:4200`
+
+2) Backend environment (.env):
+```
+GOOGLE_CLIENT_ID=xxxxxxxxxxxxxxxxxxxxxxxxxxxx.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=xxxxxxxxxxxxxxxxxxxxxx
+GOOGLE_CALLBACK_URL=http://localhost:3333/auth/google/callback
+```
+
+3) Flow:
+- Frontend: calls `GET http://localhost:3333/auth/google/url`, then redirects to returned URL.
+- Backend: handles callback, creates/updates the user, starts session, redirects to `/dashboard`.

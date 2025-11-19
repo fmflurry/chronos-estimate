@@ -5,5 +5,9 @@ import {
   BrowserTestingModule,
   platformBrowserTesting,
 } from '@angular/platform-browser/testing';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 
-getTestBed().initTestEnvironment(BrowserTestingModule, platformBrowserTesting());
+getTestBed().initTestEnvironment(
+  BrowserTestingModule,
+  platformBrowserTesting([HttpClientTestingModule])
+);
