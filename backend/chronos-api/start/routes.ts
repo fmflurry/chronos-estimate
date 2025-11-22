@@ -20,6 +20,11 @@ router
   .group(() => {
     router.get('/google/url', [() => import('#controllers/auth_controller'), 'getGoogleUrl'])
     router.get('/google/callback', [() => import('#controllers/auth_controller'), 'callback'])
+    router.get('/microsoft/url', [() => import('#controllers/auth_controller'), 'getMicrosoftUrl'])
+    router.get('/microsoft/callback', [
+      () => import('#controllers/auth_controller'),
+      'microsoftCallback',
+    ])
     router.post('/logout', [() => import('#controllers/auth_controller'), 'logout'])
     router.get('/me', [() => import('#controllers/auth_controller'), 'me'])
   })
@@ -37,6 +42,8 @@ router
     router.post('/user/settings', [() => import('#controllers/users_controller'), 'updateSettings'])
 
     router.get('/ado/search', [() => import('#controllers/ado_controller'), 'search'])
+    router.get('/ado/orgs', [() => import('#controllers/ado_controller'), 'organizations'])
+    router.get('/ado/projects', [() => import('#controllers/ado_controller'), 'projects'])
   })
   .prefix('/api')
   .use(middleware.auth())

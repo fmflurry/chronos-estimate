@@ -7,10 +7,27 @@ export class AdoService {
   apiUrl = 'http://localhost:3333/api/ado';
 
   search(query: string) {
-    return this.http.get<any[]>(`${this.apiUrl}/search`, { 
+    return this.http.get<any[]>(`${this.apiUrl}/search`, {
       params: { query },
-      withCredentials: true 
+      withCredentials: true,
+    });
+  }
+
+  getOrganizations() {
+    return this.http.get<string[]>(`${this.apiUrl}/orgs`, {
+      withCredentials: true,
+    });
+  }
+
+  getProjects(org?: string) {
+    const params: Record<string, string> = {};
+    if (org) {
+      params['org'] = org;
+    }
+
+    return this.http.get<string[]>(`${this.apiUrl}/projects`, {
+      params,
+      withCredentials: true,
     });
   }
 }
-

@@ -15,6 +15,10 @@ export class AuthService {
     return this.http.get<{ url: string }>('http://localhost:3333/auth/google/url');
   }
 
+  getMicrosoftAuthUrl() {
+    return this.http.get<{ url: string }>('http://localhost:3333/auth/microsoft/url');
+  }
+
   checkAuth() {
     return this.http.get('http://localhost:3333/auth/me', { withCredentials: true }).pipe(
       tap((user) => this.currentUser.set(user)),

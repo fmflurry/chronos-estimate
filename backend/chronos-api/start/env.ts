@@ -40,6 +40,15 @@ export default await Env.create(new URL('../', import.meta.url), {
 
   /*
   |----------------------------------------------------------
+  | Microsoft OAuth
+  |----------------------------------------------------------
+  */
+  MICROSOFT_CLIENT_ID: Env.schema.string(),
+  MICROSOFT_CLIENT_SECRET: Env.schema.string(),
+  MICROSOFT_CALLBACK_URL: Env.schema.string(),
+
+  /*
+  |----------------------------------------------------------
   | Frontend URL for post-login redirects
   |----------------------------------------------------------
   */

@@ -11,7 +11,10 @@ import { AuthService } from '../core/services/auth.service';
       <div class="login-card">
         <h2>Welcome to ChronosEstimate</h2>
         <p>Please sign in to continue</p>
-        <button (click)="signInWithGoogle()" class="google-btn">Sign in with Google</button>
+        <div class="auth-buttons">
+          <button (click)="signInWithGoogle()" class="auth-btn google-btn">Sign in with Google</button>
+          <button (click)="signInWithMicrosoft()" class="auth-btn microsoft-btn">Sign in with Microsoft</button>
+        </div>
       </div>
     </div>
   `,
@@ -41,9 +44,13 @@ import { AuthService } from '../core/services/auth.service';
         color: var(--nord4);
         margin-bottom: 2rem;
       }
-      .google-btn {
+      .auth-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+      .auth-btn {
         display: inline-block;
-        background: var(--nord10);
         color: var(--nord6);
         padding: 0.75rem 1.5rem;
         border-radius: 4px;
@@ -54,8 +61,18 @@ import { AuthService } from '../core/services/auth.service';
         cursor: pointer;
         font-size: 1rem;
         font-family: inherit;
+        width: 100%;
+      }
+      .google-btn {
+        background: var(--nord10);
         &:hover {
           background: var(--nord9);
+        }
+      }
+      .microsoft-btn {
+        background: var(--nord12);
+        &:hover {
+          background: var(--nord11);
         }
       }
     `,
@@ -66,6 +83,15 @@ export class LoginComponent {
 
   signInWithGoogle() {
     this.authService.getGoogleAuthUrl().subscribe({
+      next: ({ url }) => {
+        globalThis.location.href = url;
+      },
+      error: (err) => console.error('Error initiating login:', err),
+    });
+  }
+
+  signInWithMicrosoft() {
+    this.authService.getMicrosoftAuthUrl().subscribe({
       next: ({ url }) => {
         globalThis.location.href = url;
       },

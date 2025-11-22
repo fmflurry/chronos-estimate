@@ -18,10 +18,13 @@ export default class User extends compose(BaseModel, AuthFinder) {
   declare fullName: string | null
 
   @column()
-  declare email: string
+  declare email: string | null
 
   @column()
   declare googleId: string | null
+
+  @column()
+  declare microsoftId: string | null
 
   @column()
   declare avatarUrl: string | null
@@ -34,6 +37,9 @@ export default class User extends compose(BaseModel, AuthFinder) {
 
   @column()
   declare adoProject: string | null
+
+  @column()
+  declare microsoftOrganizations: string[] | null
 
   @column({ serializeAs: null })
   declare password: string
