@@ -4,45 +4,40 @@ import { FormsModule } from '@angular/forms';
 import { AdoService } from '../../../core/services/ado.service';
 import { debounceTime, distinctUntilChanged, switchMap, of, catchError } from 'rxjs';
 import { Subject } from 'rxjs';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatInputModule } from '@angular/material/input';
+import { MatFormFieldModule } from '@angular/material/form-field';
 
 @Component({
   selector: 'app-autocomplete',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, MatAutocompleteModule, MatInputModule, MatFormFieldModule],
   template: `
     <div class="autocomplete">
-      <input 
-        [ngModel]="query()" 
-        (ngModelChange)="onSearch($event)" 
-        placeholder="Search Work Items..." 
-        class="search-input"
-      />
-      @if (results().length > 0) {
-        <ul class="results-list">
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>Search Work Items</mat-label>
+        <input 
+          matInput
+          [ngModel]="query()" 
+          (ngModelChange)="onSearch($event)" 
+          placeholder="Enter title or ID..."
+          [matAutocomplete]="auto"
+        />
+        <mat-autocomplete #auto="matAutocomplete" (optionSelected)="select($event.option.value)">
           @for (item of results(); track item.id) {
-            <li (click)="select(item)">
+            <mat-option [value]="item">
               <span class="id">#{{ item.id }}</span>
-              <span class="title">{{ item.fields['System.Title'] }}</span>
-            </li>
+              <span class="title"> - {{ item.fields['System.Title'] }}</span>
+            </mat-option>
           }
-        </ul>
-      }
+        </mat-autocomplete>
+      </mat-form-field>
     </div>
   `,
   styles: [`
-    .autocomplete { position: relative; width: 100%; max-width: 500px; }
-    .search-input { width: 100%; padding: 0.75rem; border: 1px solid var(--nord3); background: var(--nord0); color: var(--nord4); border-radius: 4px; }
-    .results-list {
-      position: absolute; top: 100%; left: 0; right: 0;
-      background: var(--nord1); border: 1px solid var(--nord3);
-      list-style: none; padding: 0; margin: 0; z-index: 10;
-      max-height: 200px; overflow-y: auto;
-    }
-    .results-list li {
-      padding: 0.5rem; cursor: pointer; display: flex; gap: 0.5rem;
-      &:hover { background: var(--nord2); }
-    }
-    .id { color: var(--nord9); font-weight: bold; }
+    .autocomplete { width: 100%; max-width: 500px; }
+    .full-width { width: 100%; }
+    .id { color: var(--nord9); font-weight: bold; margin-right: 0.5rem; }
   `]
 })
 export class AutocompleteComponent {

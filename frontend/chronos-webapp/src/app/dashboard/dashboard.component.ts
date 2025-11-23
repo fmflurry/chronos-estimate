@@ -4,48 +4,82 @@ import { SettingsComponent } from '../settings/settings.component';
 import { RoomsService } from '../core/services/rooms.service';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { MatCardModule } from '@angular/material/card';
+import { MatButtonModule } from '@angular/material/button';
+import { MatListModule } from '@angular/material/list';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 import { LeaderboardComponent } from './leaderboard/leaderboard.component';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, SettingsComponent, FormsModule, LeaderboardComponent],
+  imports: [
+    CommonModule,
+    SettingsComponent,
+    FormsModule,
+    LeaderboardComponent,
+    MatCardModule,
+    MatButtonModule,
+    MatListModule,
+    MatFormFieldModule,
+    MatInputModule,
+  ],
   template: `
     <div class="dashboard-container">
       <h2>Dashboard</h2>
       <div class="dashboard-grid">
-        <div class="card leaderboards">
-          <h3>Leaderboards</h3>
-          <app-leaderboard></app-leaderboard>
-        </div>
-        <div class="card team">
-          <h3>Team Members</h3>
-          <p>Coming soon...</p>
-        </div>
-        <div class="card rooms">
-          <h3>Rooms</h3>
-          <div class="rooms-actions">
-            <button (click)="createRoom()" class="btn-primary">Create Room</button>
-            <div class="join-room">
-              <input [(ngModel)]="joinRoomId" placeholder="Room ID" />
-              <button (click)="joinRoom()" class="btn-secondary">Join</button>
+        <mat-card class="card leaderboards">
+          <mat-card-header>
+            <mat-card-title>Leaderboards</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <app-leaderboard></app-leaderboard>
+          </mat-card-content>
+        </mat-card>
+        <mat-card class="card team">
+          <mat-card-header>
+            <mat-card-title>Team Members</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <p>Coming soon...</p>
+          </mat-card-content>
+        </mat-card>
+        <mat-card class="card rooms">
+          <mat-card-header>
+            <mat-card-title>Rooms</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="rooms-actions">
+              <button mat-raised-button color="primary" (click)="createRoom()">Create Room</button>
+              <div class="join-room">
+                <mat-form-field appearance="fill" class="full-width">
+                  <mat-label>Room ID</mat-label>
+                  <input matInput [(ngModel)]="joinRoomId" placeholder="Enter ID" />
+                </mat-form-field>
+                <button mat-stroked-button (click)="joinRoom()">Join</button>
+              </div>
             </div>
-          </div>
-          <ul class="rooms-list">
-            @for (room of rooms(); track room.id) {
-            <li (click)="enterRoom(room.id)">
-              <span class="room-name">{{ room.name }}</span>
-              <span class="room-date">{{ room.updatedAt | date : 'short' }}</span>
-            </li>
-            } @empty {
-            <li>No rooms yet. Create one!</li>
-            }
-          </ul>
-        </div>
-        <div class="card settings">
-          <h3>Settings</h3>
-          <app-settings></app-settings>
-        </div>
+            <mat-nav-list class="rooms-list">
+              @for (room of rooms(); track room.id) {
+              <a mat-list-item (click)="enterRoom(room.id)">
+                <span matListItemTitle>{{ room.name }}</span>
+                <span matListItemLine>{{ room.updatedAt | date : 'short' }}</span>
+              </a>
+              } @empty {
+              <mat-list-item>No rooms yet. Create one!</mat-list-item>
+              }
+            </mat-nav-list>
+          </mat-card-content>
+        </mat-card>
+        <mat-card class="card settings">
+          <mat-card-header>
+            <mat-card-title>Settings</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <app-settings></app-settings>
+          </mat-card-content>
+        </mat-card>
       </div>
     </div>
   `,
@@ -61,16 +95,8 @@ import { LeaderboardComponent } from './leaderboard/leaderboard.component';
         margin-top: 1.5rem;
       }
       .card {
-        background: var(--nord1);
-        padding: 1.5rem;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        height: 100%;
       }
-      h3 {
-        color: var(--nord8);
-        margin-bottom: 1rem;
-      }
-
       .rooms-actions {
         display: flex;
         flex-direction: column;
@@ -80,49 +106,14 @@ import { LeaderboardComponent } from './leaderboard/leaderboard.component';
       .join-room {
         display: flex;
         gap: 0.5rem;
+        align-items: center;
       }
-      input {
-        padding: 0.5rem;
-        border: 1px solid var(--nord3);
-        background: var(--nord0);
-        color: var(--nord4);
-        border-radius: 4px;
+      .full-width {
         flex: 1;
       }
-
-      .btn-primary {
-        background: var(--nord8);
-        color: var(--nord0);
-        padding: 0.5rem 1rem;
-        border: none;
-        border-radius: 4px;
-      }
-      .btn-secondary {
-        background: var(--nord3);
-        color: var(--nord6);
-        padding: 0.5rem 1rem;
-        border: none;
-        border-radius: 4px;
-      }
-
       .rooms-list {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-      }
-      .rooms-list li {
-        padding: 0.75rem;
-        border-bottom: 1px solid var(--nord0);
-        cursor: pointer;
-        display: flex;
-        justify-content: space-between;
-        &:hover {
-          background: var(--nord2);
-        }
-      }
-      .room-date {
-        font-size: 0.8rem;
-        color: var(--nord3);
+        max-height: 300px;
+        overflow-y: auto;
       }
     `,
   ],

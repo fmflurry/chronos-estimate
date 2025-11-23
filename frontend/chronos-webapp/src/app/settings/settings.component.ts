@@ -4,66 +4,83 @@ import { FormsModule } from '@angular/forms';
 import { AuthService } from '../core/services/auth.service';
 import { HttpClient } from '@angular/common/http';
 import { AdoService } from '../core/services/ado.service';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
 
 @Component({
   selector: 'app-settings',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatAutocompleteModule,
+  ],
   template: `
     <div class="settings-form">
-      <div class="form-group">
-        <label>Display Name</label>
+      <mat-form-field appearance="fill">
+        <mat-label>Display Name</mat-label>
         <input
+          matInput
           [ngModel]="displayName()"
           (ngModelChange)="displayName.set($event)"
           placeholder="Display Name"
         />
-      </div>
-      <div class="form-group">
-        <label>Azure DevOps PAT</label>
+      </mat-form-field>
+
+      <mat-form-field appearance="fill">
+        <mat-label>Azure DevOps PAT</mat-label>
         <input
+          matInput
           type="password"
           [ngModel]="adoPat()"
           (ngModelChange)="onPatChange($event)"
           placeholder="Personal Access Token"
         />
-        <small>Stored securely</small>
-      </div>
-      <div class="form-group autocomplete-group">
-        <label>ADO Organization</label>
+        <mat-hint>Stored securely</mat-hint>
+      </mat-form-field>
+
+      <mat-form-field appearance="fill">
+        <mat-label>ADO Organization</mat-label>
         <input
+          matInput
+          type="text"
           [ngModel]="adoOrg()"
           (ngModelChange)="onOrgInput($event)"
           (focus)="loadOrganizations()"
+          [matAutocomplete]="autoOrg"
           placeholder="Organization"
-          autocomplete="off"
         />
-        @if (filteredAdoOrgs().length > 0) {
-        <ul class="options">
+        <mat-autocomplete #autoOrg="matAutocomplete" (optionSelected)="selectOrg($event.option.value)">
           @for (org of filteredAdoOrgs(); track org) {
-          <li (click)="selectOrg(org)">{{ org }}</li>
+          <mat-option [value]="org">{{ org }}</mat-option>
           }
-        </ul>
-        }
-      </div>
-      <div class="form-group autocomplete-group">
-        <label>ADO Project</label>
+        </mat-autocomplete>
+      </mat-form-field>
+
+      <mat-form-field appearance="fill">
+        <mat-label>ADO Project</mat-label>
         <input
+          matInput
+          type="text"
           [ngModel]="adoProject()"
           (ngModelChange)="onProjectInput($event)"
           (focus)="loadProjects()"
+          [matAutocomplete]="autoProject"
           placeholder="Project"
-          autocomplete="off"
         />
-        @if (filteredAdoProjects().length > 0) {
-        <ul class="options">
+        <mat-autocomplete #autoProject="matAutocomplete" (optionSelected)="selectProject($event.option.value)">
           @for (project of filteredAdoProjects(); track project) {
-          <li (click)="selectProject(project)">{{ project }}</li>
+          <mat-option [value]="project">{{ project }}</mat-option>
           }
-        </ul>
-        }
-      </div>
-      <button (click)="saveSettings()" class="btn-primary">Save Settings</button>
+        </mat-autocomplete>
+      </mat-form-field>
+
+      <button mat-raised-button color="primary" (click)="saveSettings()">Save Settings</button>
     </div>
   `,
   styles: [
@@ -73,50 +90,8 @@ import { AdoService } from '../core/services/ado.service';
         flex-direction: column;
         gap: 1rem;
       }
-      .form-group {
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
-        position: relative;
-      }
-      input {
-        padding: 0.5rem;
-        border: 1px solid var(--nord3);
-        background: var(--nord0);
-        color: var(--nord4);
-        border-radius: 4px;
-      }
-      .btn-primary {
-        background: var(--nord8);
-        color: var(--nord0);
-        padding: 0.5rem 1rem;
-        border: none;
-        border-radius: 4px;
-      }
-      small {
-        color: var(--nord3);
-        font-size: 0.8rem;
-      }
-      .autocomplete-group .options {
-        position: absolute;
-        top: 100%;
-        left: 0;
-        right: 0;
-        background: var(--nord1);
-        border: 1px solid var(--nord3);
-        list-style: none;
-        padding: 0;
-        margin: 0.25rem 0 0;
-        max-height: 200px;
-        overflow-y: auto;
-        z-index: 10;
-      }
-      .autocomplete-group .options li {
-        padding: 0.5rem;
-        cursor: pointer;
-      }
-      .autocomplete-group .options li:hover {
-        background: var(--nord2);
+      mat-form-field {
+        width: 100%;
       }
     `,
   ],
@@ -231,7 +206,10 @@ export class SettingsComponent {
         withCredentials: true,
       })
       .subscribe({
-        next: () => alert('Settings saved!'),
+        next: () => {
+          this.authService.checkAuth().subscribe();
+          alert('Settings saved!');
+        },
         error: () => alert('Error saving settings'),
       });
   }
