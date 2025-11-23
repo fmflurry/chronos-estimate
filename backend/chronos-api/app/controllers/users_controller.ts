@@ -11,9 +11,12 @@ export default class UsersController {
     ])
 
     if (fullName) user.fullName = fullName
-    if (adoPat) user.adoPat = adoPat
-    if (adoOrg) user.adoOrg = adoOrg
-    if (adoProject) user.adoProject = adoProject
+    if (adoPat !== undefined) {
+      const trimmedPat = adoPat.trim()
+      user.adoPat = trimmedPat || null
+    }
+    if (adoOrg !== undefined) user.adoOrg = adoOrg?.trim() || null
+    if (adoProject !== undefined) user.adoProject = adoProject?.trim() || null
 
     await user.save()
     return response.ok({ success: true })
