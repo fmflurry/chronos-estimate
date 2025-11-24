@@ -4,12 +4,12 @@ import { Observable } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class WebSocketService {
-  private socket: Socket;
+  private readonly socket: Socket;
 
   constructor() {
     this.socket = io('http://localhost:3333', {
       withCredentials: true,
-      autoConnect: false
+      autoConnect: false,
     });
   }
 
@@ -24,14 +24,14 @@ export class WebSocketService {
   joinRoom(roomId: string) {
     this.socket.emit('join-room', roomId);
   }
-  
-  emit(event: string, data: any) {
+
+  emit(event: string, data: unknown) {
     this.socket.emit(event, data);
   }
 
-  on(event: string): Observable<any> {
-    return new Observable(observer => {
-      this.socket.on(event, data => observer.next(data));
+  on(event: string): Observable<unknown> {
+    return new Observable((observer) => {
+      this.socket.on(event, (data: unknown) => observer.next(data));
     });
   }
 }

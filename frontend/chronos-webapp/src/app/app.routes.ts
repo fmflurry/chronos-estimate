@@ -17,6 +17,16 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadComponent: () => import('./room/room.component').then((m) => m.RoomComponent),
   },
+  {
+    path: 'team/:id',
+    canActivate: [authGuard],
+    loadComponent: () => import('./team/team.component').then((m) => m.TeamComponent),
+  },
+  {
+    path: 'team/:id/invite/:token',
+    canActivate: [authGuard],
+    loadComponent: () => import('./team/team.component').then((m) => m.TeamComponent),
+  },
   { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
   { path: '**', redirectTo: 'dashboard' },
 ];

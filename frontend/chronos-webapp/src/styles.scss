@@ -1,4 +1,4 @@
-
+@use 'material-icons/iconfont/material-icons.css';
 @use '@angular/material' as mat;
 
 // Include the common styles for Angular Material. We include this here so that you only
@@ -32,7 +32,8 @@ $nord-primary: (
   200: #a8c5db,
   300: #85adcc,
   400: #6b9cbd,
-  500: #5e81ac, // nord10
+  500: #5e81ac,
+  // nord10
   600: #5679a5,
   700: #4c6e9b,
   800: #426492,
@@ -56,7 +57,7 @@ $nord-primary: (
     A200: #000000,
     A400: #000000,
     A700: #ffffff,
-  )
+  ),
 );
 
 $nord-accent: (
@@ -65,7 +66,8 @@ $nord-accent: (
   200: #c2e1e9,
   300: #a9d5df,
   400: #96ccd8,
-  500: #88c0d0, // nord8
+  500: #88c0d0,
+  // nord8
   600: #80bacb,
   700: #75b2c4,
   800: #6baabf,
@@ -89,7 +91,7 @@ $nord-accent: (
     A200: #000000,
     A400: #000000,
     A700: #000000,
-  )
+  ),
 );
 
 $nord-warn: (
@@ -98,7 +100,8 @@ $nord-warn: (
   200: #deb2b7,
   300: #d0939a,
   400: #c67c85,
-  500: #bf616a, // nord11
+  500: #bf616a,
+  // nord11
   600: #ba5962,
   700: #b34f57,
   800: #ac454d,
@@ -122,7 +125,7 @@ $nord-warn: (
     A200: #000000,
     A400: #000000,
     A700: #ffffff,
-  )
+  ),
 );
 
 // Define the theme
@@ -130,21 +133,24 @@ $chronos-primary: mat.m2-define-palette($nord-primary);
 $chronos-accent: mat.m2-define-palette($nord-accent);
 $chronos-warn: mat.m2-define-palette($nord-warn);
 
-$chronos-theme: mat.m2-define-dark-theme((
-  color: (
-    primary: $chronos-primary,
-    accent: $chronos-accent,
-    warn: $chronos-warn,
-  ),
-  typography: mat.m2-define-typography-config(),
-  density: 0,
-));
+$chronos-theme: mat.m2-define-dark-theme(
+  (
+    color: (
+      primary: $chronos-primary,
+      accent: $chronos-accent,
+      warn: $chronos-warn,
+    ),
+    typography: mat.m2-define-typography-config(),
+    density: 0,
+  )
+);
 
 // Apply the theme
 @include mat.all-component-themes($chronos-theme);
 
 // Custom global styles
-html, body {
+html,
+body {
   height: 100%;
 }
 
@@ -152,7 +158,7 @@ body {
   margin: 0;
   background: var(--nord0);
   color: var(--nord4);
-  font-family: Roboto, "Helvetica Neue", sans-serif;
+  font-family: Roboto, 'Helvetica Neue', sans-serif;
 }
 
 // Override Material background for dark theme to match Nord0/Nord1

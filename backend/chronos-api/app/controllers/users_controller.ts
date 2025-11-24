@@ -1,4 +1,5 @@
 import type { HttpContext } from '@adonisjs/core/http'
+import User from '#models/user'
 
 export default class UsersController {
   async updateSettings({ auth, request, response }: HttpContext) {
@@ -20,5 +21,25 @@ export default class UsersController {
 
     await user.save()
     return response.ok({ success: true })
+  }
+
+  async search({ request }: HttpContext) {
+    const { q } = request.only(['q'])
+    
+    if (!q || q.length < 2) {
+      return []
+    }
+
+    const searchTerm = `%${q}%`
+    const users = await User.query()
+      .where((query) => {
+        query
+          .where('email', 'like', searchTerm)
+          .orWhere('fullName', 'like', searchTerm)
+      })
+      .limit(20)
+      .select('id', 'email', 'fullName', 'avatarUrl')
+
+    return users
   }
 }
