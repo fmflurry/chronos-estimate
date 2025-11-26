@@ -34,5 +34,17 @@ export default class NotificationsController {
 
     return { success: true }
   }
+
+  async destroy({ params, auth, response }: HttpContext) {
+    const user = auth.user!
+    const notification = await Notification.find(params.id)
+
+    if (!notification) return response.notFound()
+    if (notification.userId !== user.id) return response.forbidden()
+
+    await notification.delete()
+
+    return { success: true }
+  }
 }
 

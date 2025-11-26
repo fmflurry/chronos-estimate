@@ -22,7 +22,7 @@ export default class Notification extends BaseModel {
   @column()
   declare link: string | null
 
-  @column()
+  @column({ serializeAs: 'read' })
   declare isRead: boolean
 
   @column.dateTime({ autoCreate: true })

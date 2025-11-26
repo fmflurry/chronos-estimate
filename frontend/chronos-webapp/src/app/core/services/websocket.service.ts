@@ -34,4 +34,8 @@ export class WebSocketService {
       this.socket.on(event, (data: unknown) => observer.next(data));
     });
   }
+
+  authenticate(userId: number) {
+    this.socket.emit('authenticate', userId);
+  }
 }

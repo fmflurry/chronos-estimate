@@ -46,14 +46,59 @@ export default class AdoController {
       return response.badRequest('ADO configuration missing')
     }
 
-    const wiql = `SELECT [System.Id], [System.Title] FROM WorkItems WHERE [System.Title] CONTAINS '${query}' AND [System.TeamProject] = '${user.adoProject}'`
-
+    const searchTerm = query.trim()
+    const isNumeric = /^\d+$/.test(searchTerm)
+    
     try {
       const pat = user.adoPat.trim()
       if (!pat) {
         return response.badRequest('ADO PAT is empty or invalid')
       }
       const authHeader = this.createAuthHeader(pat)
+
+      if (isNumeric) {
+        try {
+          const details = await axios.get(
+            `https://dev.azure.com/${user.adoOrg}/${user.adoProject}/_apis/wit/workitems/${searchTerm}?fields=System.Id,System.Title&api-version=7.1`,
+            { headers: { Authorization: authHeader, 'Content-Type': 'application/json' } }
+          )
+          return [details.data]
+        } catch (exactMatchError: any) {
+          if (exactMatchError?.response?.status !== 404) {
+            throw exactMatchError
+          }
+        }
+
+        const minId = parseInt(searchTerm + '0'.repeat(Math.max(0, 6 - searchTerm.length)))
+        const maxId = parseInt(searchTerm + '9'.repeat(Math.max(0, 6 - searchTerm.length)))
+
+        const wiql = `SELECT [System.Id], [System.Title] FROM WorkItems WHERE [System.Id] >= ${minId} AND [System.Id] <= ${maxId} AND [System.TeamProject] = '${user.adoProject}' ORDER BY [System.Id] ASC`
+
+        const result = await axios.post(
+          `https://dev.azure.com/${user.adoOrg}/${user.adoProject}/_apis/wit/wiql?api-version=7.1`,
+          { query: wiql },
+          { headers: { Authorization: authHeader, 'Content-Type': 'application/json' } }
+        )
+
+        const workItems = result.data.workItems
+        if (workItems.length === 0) return []
+
+        const matchingIds = workItems
+          .map((wi: any) => wi.id)
+          .filter((id: number) => id.toString().includes(searchTerm))
+          .slice(0, 10)
+
+        if (matchingIds.length === 0) return []
+
+        const details = await axios.get(
+          `https://dev.azure.com/${user.adoOrg}/${user.adoProject}/_apis/wit/workitems?ids=${matchingIds.join(',')}&fields=System.Id,System.Title&api-version=7.1`,
+          { headers: { Authorization: authHeader, 'Content-Type': 'application/json' } }
+        )
+
+        return details.data.value
+      }
+
+      const wiql = `SELECT [System.Id], [System.Title] FROM WorkItems WHERE [System.Title] CONTAINS '${searchTerm}' AND [System.TeamProject] = '${user.adoProject}'`
 
       const result = await axios.post(
         `https://dev.azure.com/${user.adoOrg}/${user.adoProject}/_apis/wit/wiql?api-version=7.1`,
@@ -69,6 +114,7 @@ export default class AdoController {
         .slice(0, 10)
         .map((wi: any) => wi.id)
         .join(',')
+
       const details = await axios.get(
         `https://dev.azure.com/${user.adoOrg}/${user.adoProject}/_apis/wit/workitems?ids=${ids}&fields=System.Id,System.Title&api-version=7.1`,
         { headers: { Authorization: authHeader, 'Content-Type': 'application/json' } }

@@ -34,8 +34,8 @@ export default class UsersController {
     const users = await User.query()
       .where((query) => {
         query
-          .where('email', 'like', searchTerm)
-          .orWhere('fullName', 'like', searchTerm)
+          .whereILike('email', searchTerm)
+          .orWhereILike('fullName', searchTerm)
       })
       .limit(20)
       .select('id', 'email', 'fullName', 'avatarUrl')

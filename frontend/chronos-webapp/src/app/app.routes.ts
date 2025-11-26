@@ -18,6 +18,11 @@ export const routes: Routes = [
     loadComponent: () => import('./room/room.component').then((m) => m.RoomComponent),
   },
   {
+    path: 'room/:id/invite/:token',
+    canActivate: [authGuard],
+    loadComponent: () => import('./room/room.component').then((m) => m.RoomComponent),
+  },
+  {
     path: 'team/:id',
     canActivate: [authGuard],
     loadComponent: () => import('./team/team.component').then((m) => m.TeamComponent),

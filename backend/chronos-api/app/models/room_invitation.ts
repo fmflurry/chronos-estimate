@@ -1,15 +1,15 @@
 import { DateTime } from 'luxon'
 import { BaseModel, column, belongsTo } from '@adonisjs/lucid/orm'
 import type { BelongsTo } from '@adonisjs/lucid/types/relations'
-import Team from '#models/team'
+import Room from '#models/room'
 import User from '#models/user'
 
-export default class TeamInvitation extends BaseModel {
+export default class RoomInvitation extends BaseModel {
   @column({ isPrimary: true })
   declare id: number
 
   @column()
-  declare teamId: number
+  declare roomId: number
 
   @column()
   declare invitedByUserId: number
@@ -32,8 +32,8 @@ export default class TeamInvitation extends BaseModel {
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime
 
-  @belongsTo(() => Team)
-  declare team: BelongsTo<typeof Team>
+  @belongsTo(() => Room)
+  declare room: BelongsTo<typeof Room>
 
   @belongsTo(() => User, {
     foreignKey: 'invitedByUserId',
@@ -45,4 +45,3 @@ export default class TeamInvitation extends BaseModel {
   })
   declare invitedUser: BelongsTo<typeof User>
 }
-

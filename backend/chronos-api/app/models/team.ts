@@ -3,6 +3,7 @@ import { BaseModel, column, belongsTo, hasMany } from '@adonisjs/lucid/orm'
 import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 import User from '#models/user'
 import TeamMember from '#models/team_member'
+import TeamInvitation from '#models/team_invitation'
 
 export default class Team extends BaseModel {
   @column({ isPrimary: true })
@@ -27,5 +28,8 @@ export default class Team extends BaseModel {
 
   @hasMany(() => TeamMember)
   declare members: HasMany<typeof TeamMember>
+
+  @hasMany(() => TeamInvitation)
+  declare invitations: HasMany<typeof TeamInvitation>
 }
 

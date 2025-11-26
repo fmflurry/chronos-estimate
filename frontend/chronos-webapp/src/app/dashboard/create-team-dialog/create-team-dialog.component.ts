@@ -8,10 +8,14 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { UsersService } from '../../core/services/users.service';
 import { TeamsService } from '../../core/services/teams.service';
+import { AuthService } from '../../core/services/auth.service';
 import { debounceTime, distinctUntilChanged, switchMap, of, catchError } from 'rxjs';
 import { Subject } from 'rxjs';
+import { AlertDialogComponent } from '../../shared/components/alert-dialog/alert-dialog.component';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-create-team-dialog',
@@ -26,6 +30,7 @@ import { Subject } from 'rxjs';
     MatAutocompleteModule,
     MatChipsModule,
     MatIconModule,
+    MatTooltipModule,
   ],
   template: `
     <h2 mat-dialog-title>Create Team</h2>
@@ -45,17 +50,16 @@ import { Subject } from 'rxjs';
             placeholder="Search by email or name, or enter email"
             [matAutocomplete]="auto"
           />
-          <mat-autocomplete #auto="matAutocomplete" (optionSelected)="addMember($event.option.value)">
+          <mat-autocomplete #auto="matAutocomplete" (optionSelected)="addMember($event.option.value)" [displayWith]="displayUser">
             @if (searchQuery().length >= 2) {
               @for (user of searchResults(); track user.id) {
                 <mat-option [value]="user">
                   <span>{{ user.fullName || user.email }}</span>
+                  @if (user.email && user.fullName) {
                   <span class="email"> - {{ user.email }}</span>
+                  }
                 </mat-option>
               }
-              <mat-option [value]="{ email: searchQuery(), isNew: true }">
-                <span>Invite {{ searchQuery() }} (new user)</span>
-              </mat-option>
             }
           </mat-autocomplete>
         </mat-form-field>
@@ -117,7 +121,9 @@ import { Subject } from 'rxjs';
 export class CreateTeamDialogComponent {
   usersService = inject(UsersService);
   teamsService = inject(TeamsService);
+  authService = inject(AuthService);
   dialogRef = inject(MatDialogRef<CreateTeamDialogComponent>);
+  dialog = inject(MatDialog);
 
   teamName = '';
   searchQuery = signal('');
@@ -135,7 +141,11 @@ export class CreateTeamDialogComponent {
           return this.usersService.searchUsers(term).pipe(catchError(() => of([])));
         })
       )
-      .subscribe((users) => this.searchResults.set(users));
+      .subscribe((users) => {
+        const currentUserId = this.authService.currentUser()?.id;
+        const filteredUsers = users.filter((user) => user.id !== currentUserId);
+        this.searchResults.set(filteredUsers);
+      });
   }
 
   onSearch(term: string) {
@@ -143,22 +153,20 @@ export class CreateTeamDialogComponent {
     this.searchSubject.next(term);
   }
 
-  addMember(member: any) {
-    const email = member.email || member;
-    if (!email) return;
+  displayUser(user: any): string {
+    return user ? user.fullName || user.email : '';
+  }
 
-    const exists = this.invitedMembers().some((m) => m.email === email);
+  addMember(member: any) {
+    if (!member || !member.email) return;
+
+    const exists = this.invitedMembers().some((m) => m.email === member.email);
     if (exists) {
       this.searchQuery.set('');
       return;
     }
 
-    if (typeof member === 'object' && member.email) {
-      this.invitedMembers.set([...this.invitedMembers(), member]);
-    } else {
-      this.invitedMembers.set([...this.invitedMembers(), { email, isNew: true }]);
-    }
-
+    this.invitedMembers.set([...this.invitedMembers(), member]);
     this.searchQuery.set('');
   }
 
@@ -173,7 +181,11 @@ export class CreateTeamDialogComponent {
         this.dialogRef.close(team);
       },
       error: (err) => {
-        alert('Failed to create team: ' + (err.error?.message || 'Unknown error'));
+        this.dialog.open(AlertDialogComponent, {
+          data: {
+            message: 'Failed to create team: ' + (err.error?.message || 'Unknown error'),
+          },
+        });
       },
     });
   }

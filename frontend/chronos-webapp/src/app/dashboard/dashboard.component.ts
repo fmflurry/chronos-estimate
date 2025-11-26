@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { SettingsComponent } from '../settings/settings.component';
 import { RoomsService } from '../core/services/rooms.service';
 import { TeamsService } from '../core/services/teams.service';
+import { WebSocketService } from '../core/services/websocket.service';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { debounceTime, distinctUntilChanged, switchMap, of, catchError } from 'rxjs';
@@ -13,11 +14,13 @@ import { MatListModule } from '@angular/material/list';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog } from '@angular/material/dialog';
 import { LeaderboardComponent } from './leaderboard/leaderboard.component';
 import { CreateTeamDialogComponent } from './create-team-dialog/create-team-dialog.component';
 import { SetDisplayNameDialogComponent } from '../shared/components/set-display-name-dialog/set-display-name-dialog.component';
 import { AuthService } from '../core/services/auth.service';
+import { AlertDialogComponent } from '../shared/components/alert-dialog/alert-dialog.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -33,6 +36,7 @@ import { AuthService } from '../core/services/auth.service';
     MatFormFieldModule,
     MatInputModule,
     MatAutocompleteModule,
+    MatTooltipModule,
   ],
   template: `
     <div class="dashboard-container">
@@ -78,7 +82,7 @@ import { AuthService } from '../core/services/auth.service';
               @for (team of teams(); track team.id) {
               <a mat-list-item (click)="enterTeam(team.id)">
                 <span matListItemTitle>{{ team.name }}</span>
-                <span matListItemLine>{{ team.updatedAt | date : 'short' }}</span>
+                <span matListItemLine>{{ team.connectedMembers }} / {{ team.totalMembers }} members online</span>
               </a>
               } @empty {
               <mat-list-item>No teams yet. Create one!</mat-list-item>
@@ -177,6 +181,7 @@ import { AuthService } from '../core/services/auth.service';
 export class DashboardComponent {
   roomsService = inject(RoomsService);
   teamsService = inject(TeamsService);
+  ws = inject(WebSocketService);
   router = inject(Router);
   dialog = inject(MatDialog);
   authService = inject(AuthService);
@@ -207,6 +212,38 @@ export class DashboardComponent {
       if (user && !user.fullName) {
         this.checkDisplayName();
       }
+    });
+
+    this.ws.on('team-online-members').subscribe((teamCounts: any) => {
+      this.teams.update(currentTeams => 
+        currentTeams.map(team => {
+          const teamCount = teamCounts.find((tc: any) => tc.teamId === team.id);
+          if (teamCount) {
+            return {
+              ...team,
+              connectedMembers: teamCount.connectedMembers,
+              totalMembers: teamCount.totalMembers,
+            };
+          }
+          return team;
+        })
+      );
+    });
+
+    this.ws.on('removed-from-team').subscribe((data: any) => {
+      this.teams.update(currentTeams => 
+        currentTeams.filter(team => team.id !== data.teamId)
+      );
+    });
+
+    this.ws.on('removed-from-room').subscribe((data: any) => {
+      this.rooms.update(currentRooms => 
+        currentRooms.filter(room => room.id !== data.roomId)
+      );
+    });
+
+    this.ws.on('team-member-joined').subscribe((data: any) => {
+      this.loadTeams();
     });
   }
 
@@ -246,7 +283,11 @@ export class DashboardComponent {
       next: (room) => {
         this.enterRoom(room.id);
       },
-      error: () => alert('Room not found'),
+      error: () => {
+        this.dialog.open(AlertDialogComponent, {
+          data: { message: 'Room not found' },
+        });
+      },
     });
   }
 
@@ -289,7 +330,11 @@ export class DashboardComponent {
         this.joinTeamSearchQuery.set('');
         this.joinTeamSearchResults.set([]);
       },
-      error: () => alert('Failed to join team'),
+      error: () => {
+        this.dialog.open(AlertDialogComponent, {
+          data: { message: 'Failed to join team' },
+        });
+      },
     });
   }
 

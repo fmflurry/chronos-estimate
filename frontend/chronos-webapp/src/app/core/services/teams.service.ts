@@ -34,12 +34,23 @@ export class TeamsService {
     return this.http.delete<any>(`${this.apiUrl}/${id}`, { withCredentials: true });
   }
 
-  inviteMember(teamId: string, email: string) {
-    return this.http.post<any>(`${this.apiUrl}/${teamId}/invite`, { email }, { withCredentials: true });
+  inviteMember(teamId: string, emailOrUserId: string | number) {
+    const body = typeof emailOrUserId === 'number' 
+      ? { userId: emailOrUserId }
+      : { email: emailOrUserId };
+    return this.http.post<any>(`${this.apiUrl}/${teamId}/invite`, body, { withCredentials: true });
   }
 
   updateMemberRole(teamId: string, memberId: number, role: string) {
     return this.http.put<any>(`${this.apiUrl}/${teamId}`, { memberId, role }, { withCredentials: true });
+  }
+
+  removeMember(teamId: string, memberId: number) {
+    return this.http.delete<any>(`${this.apiUrl}/${teamId}/members/${memberId}`, { withCredentials: true });
+  }
+
+  cancelInvitation(teamId: string, invitationId: number) {
+    return this.http.delete<any>(`${this.apiUrl}/${teamId}/invitations/${invitationId}`, { withCredentials: true });
   }
 }
 

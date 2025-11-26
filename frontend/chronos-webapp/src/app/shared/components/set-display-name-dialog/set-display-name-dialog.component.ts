@@ -5,8 +5,11 @@ import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../../core/services/auth.service';
+import { AlertDialogComponent } from '../alert-dialog/alert-dialog.component';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-set-display-name-dialog',
@@ -18,6 +21,7 @@ import { AuthService } from '../../../core/services/auth.service';
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
+    MatTooltipModule,
   ],
   template: `
     <h2 mat-dialog-title>Set Your Display Name</h2>
@@ -59,6 +63,7 @@ export class SetDisplayNameDialogComponent {
   dialogRef = inject(MatDialogRef<SetDisplayNameDialogComponent>);
   http = inject(HttpClient);
   authService = inject(AuthService);
+  dialog = inject(MatDialog);
 
   displayName = '';
 
@@ -80,7 +85,11 @@ export class SetDisplayNameDialogComponent {
           });
         },
         error: (err) => {
-          alert('Failed to save display name: ' + (err.error?.message || 'Unknown error'));
+          this.dialog.open(AlertDialogComponent, {
+            data: {
+              message: 'Failed to save display name: ' + (err.error?.message || 'Unknown error'),
+            },
+          });
         },
       });
   }

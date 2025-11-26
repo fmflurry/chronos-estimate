@@ -8,6 +8,9 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatDialog } from '@angular/material/dialog';
+import { AlertDialogComponent } from '../shared/components/alert-dialog/alert-dialog.component';
 
 @Component({
   selector: 'app-settings',
@@ -19,6 +22,7 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
     MatInputModule,
     MatButtonModule,
     MatAutocompleteModule,
+    MatTooltipModule,
   ],
   template: `
     <div class="settings-form">
@@ -100,6 +104,7 @@ export class SettingsComponent {
   authService = inject(AuthService);
   http = inject(HttpClient);
   adoService = inject(AdoService);
+  dialog = inject(MatDialog);
 
   displayName = signal('');
   adoPat = signal('');
@@ -208,9 +213,15 @@ export class SettingsComponent {
       .subscribe({
         next: () => {
           this.authService.checkAuth().subscribe();
-          alert('Settings saved!');
+          this.dialog.open(AlertDialogComponent, {
+            data: { message: 'Settings saved!' },
+          });
         },
-        error: () => alert('Error saving settings'),
+        error: () => {
+          this.dialog.open(AlertDialogComponent, {
+            data: { message: 'Error saving settings' },
+          });
+        },
       });
   }
 }
